@@ -1,0 +1,96 @@
+491  gcloud container clusters get-credentials pooja --region europe-central2 --project march22paid
+  492  kubectl get nodes
+  493  kubectl get po
+  494   kubectl run nginx  --image=nginx:1.16
+  495  kubectl get po
+  496  kubectl get po -o wide
+  497  kubectl logs nginx
+  498  kubectl logs po nginx
+  499  kubectl logs nginx
+  500  kubect describe nginx
+  501  kubectl describe nginx
+  502  kubectl describe po nginx
+  503   kubectl run nginx  --image=nginx:9.545
+  504   kubectl run nginx9  --image=nginx:9.545
+  505  kubectl get po
+  506  kubectl describe po nginx9
+  507  kubectl get svc
+  508  kubectl get po
+  509  kubectl get svc
+  510  clear
+  511  kubectl get svc
+  512  kubectl get svc -w
+  513  kubectl run jenkins  --image=jenkins/jenkins:lts
+  514  kubectl get svc
+
+  528  kubectl exec -it jenkins  -- bin/bash  
+  529  kubectl cluster-info
+
+  533  kubectl config get-contexts
+  534  kubectl get no
+
+  536  kubectl describe no gke-pooja-default-pool-3f60101b-q3vm
+  537  history
+
+
+
+--- 
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: qa
+
+
+---------------------------------
+
+Step 1: Login to GCP
+                                  gcloud auth login
+                                  gcloud config set project march22paid
+
+Step 2: Authenticate Docker with GCP
+This is important (many people miss this 👇)
+                                gcloud auth configure-docker africa-south1-docker.pkg.dev
+
+Step 3: Build Your Docker Image
+                                 docker build -t my-app .
+
+Step 4: Tag the Image (VERY IMPORTANT)
+You need to tag in this format:
+REGION-docker.pkg.dev/PROJECT-ID/REPO/IMAGE:TAG
+Your case:
+                                docker tag my-app africa-south1-docker.pkg.dev/march22paid/test/my-app:v1
+
+Step 5: Push the Image
+                                docker push africa-south1-docker.pkg.dev/march22paid/test/my-app:v1
+✅ Done!
+Now your image is available in Artifact Registry 🎉
+
+
+
+--------------------
+
+
+
+1. Bridge Networks: The Local Street
+
+By default, when you run a container, Docker attaches it to a bridge network if you don’t specify otherwise.
+How It Works
+Bridge networks are private to the host machine.
+Containers on the same bridge network can communicate using container names as DNS.
+External access is possible by publishing ports from the container to the host.
+
+Think of a bridge network as the local street in your neighborhood. Cars (containers) can move around freely within the neighborhood (host), but if they want to go outside (to the internet), they must pass through a gateway.
+
+Example
+# Create a custom bridge network
+                                                                       docker network create --driver bridge my_bridge
+
+# Run two containers in the same bridge network
+                                                                      docker run -dit --name app1 --network my_bridge alpine sh
+                                                                      docker run -dit --name app2 --network my_bridge alpine sh
+
+# From inside app1, you can ping app2 by name
+                                                                       docker exec -it app1 ping app2
+
+Here, Docker’s built-in DNS resolves app2 to its container IP within the bridge network.
+This makes service-to-service communication seamless.
